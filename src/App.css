@@ -1,0 +1,149 @@
+@media (max-width:768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .convertor_panel {
+    height: 610px;
+    width: 100%;
+  }
+
+  .pf_text {
+    margin-right: 5px;
+  }
+
+  .page_heading {
+    font-size: 30px;
+  }
+
+  .input_box {
+    border: 1px solid #eee;
+    border-radius: 6px;
+    width: 310px;
+  }
+
+  .sub_heading {
+    font-size: 20px;
+    text-align: left;
+    margin-left: 24px;
+  }
+
+  .cybc_input {
+    margin-left: 20px;
+    margin-bottom: 20px;
+  }
+
+  .date_quote {
+    margin-left: 10px;
+  }
+}
+
+@media (min-width: 768px) {
+  .convertor_panel {
+    margin: 40px auto;
+    height: 400px;
+    width: 816px;
+  }
+
+  .page_heading {
+    font-size: 48px;
+  }
+
+  .pf_text {
+    margin-right: 20px;
+  }
+
+  .input_box {
+    margin-right: 20px;
+    width: 98%;
+  }
+
+  .sub_heading {
+    font-size: 24px;
+    text-align: left;
+    margin: 0px 10px 30px 20px;
+  }
+
+  .cybc_input {
+    padding-top: 8px;
+    margin-left: 0px;
+    margin-bottom: 0px;
+  }
+
+  .date_quote {
+    margin-left: 5px;
+  }
+}
+
+#remarks {
+  font-style: italic;
+  font-size: 15px;
+}
+
+.heading_logo {
+  display: flex;
+  height: 96px;
+  width: 96px;
+  margin-left: 0px;
+  background-image: url(.\images\Logo.png);
+  background-repeat: no-repeat;
+  background-size: 96px auto;
+}
+
+.convertor_panel {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+}
+
+.input_rate_display {
+  margin-top: 20px;
+}
+
+.converter_box {
+  margin-left: 15px;
+}
+
+.rate_quote {
+  margin-top: inherit;
+  text-align: center;
+}
+
+.page_heading {
+  font-family: impact;
+  text-align: center;
+  padding: 20px;
+}
+
+.input_box {
+  border: 1px solid #eee;
+  border-radius: 6px;
+}
+
+.converter_arrows {
+  padding: 0px 150px 0px 150px;
+}
+
+.rate_table_panel {
+  margin: 40px auto;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+#flag {
+  height: 20px;
+  width: 20px;
+}
+
+footer {
+  height: 58px;
+  background-color: #f28500;
+}
+
+.footer_panel {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+
+}
+.socialmedia_icon {
+  margin: 10px;
+}
