@@ -1,4 +1,5 @@
 import React from "react";
+import Chart from 'chart.js';
 import BaseCcyChoice from "./BaseCcyChoice";
 import AltCcyChoice from "./AltCcyChoice";
 import RatesTable from "./RatesTable";
@@ -15,6 +16,9 @@ class Page extends React.Component {  constructor(props) {
       baseAmount: "",
       altAmount:  "",
     };
+
+    this.chartRef = React.createRef();
+
     this.baseChange = this.baseChange.bind(this);
     this.altChange = this.altChange.bind(this);
     this.baseToAlt = this.baseToAlt.bind(this);
@@ -92,6 +96,44 @@ class Page extends React.Component {  constructor(props) {
       });
     };
 
+  getHistoricalRates = (base, quote) => {
+    const endDate = new Date().toISOString().split('T')[0];
+    const startDate = new Date((new Date).getTime() - (30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+
+    fetch(`https://alt-exchange-rate.herokuapp.com/history?start_at=${startDate}&end_at=${endDate}&base=${base}&symbols=${quote}`)
+    .then(data => {
+      const chartLabels = Object.keys(data.rates);
+      const chartData = Object.values(data.rates).map(rate => rate[quote]);
+      const chartLabel = `${base}/${quote}`;
+      this.buildChart(chartLabels, chartData, chartLabel);
+    })
+    .catch(error => console.error(error.message));
+  }
+buildChart = (labels, data, label) => {
+  const chartRef = this.chartRef.current.getContext("2d");
+  if (typeof this.chart !== "undefined") {
+    this.chart.destroy();
+  }
+  this.chart = new Chart(this.chartRef.current.getContext("2d"), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: label,
+          data,
+          fill: false,
+          tension: 0,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+    }
+  })
+}
+
+
   render () {
     const { baseCurrency, altCurrency, baseAmount, altAmount, quote, date } = this.state;
     return(
@@ -145,6 +187,9 @@ class Page extends React.Component {  constructor(props) {
                           </div>) : (<span id="remarks">*choose currency pair</span>)}
 
         </div>
+        <div className="historic_chart col-12">
+          <canvas ref={this.chartRef} />
+        </div>
       </div>
       </div>
       <hr/>
@@ -161,7 +206,7 @@ class Page extends React.Component {  constructor(props) {
           <div className="date_quote col-12" id="remarks">
             <h6>Foreign Exchange Rates based on:   {date}</h6>
           </div>
-        </div> 
+        </div>
         <RatesTable
           baseChange={this.baseChange}
           data={this.state}
