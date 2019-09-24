@@ -5,16 +5,19 @@ import AltCcyChoice from "./AltCcyChoice";
 import RatesTable from "./RatesTable";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-class Page extends React.Component {  constructor(props) {
+class Page extends React.Component {
+  constructor(props) {
     super(props);
+
     this.state = {
       baseCurrency: "EUR",
-      altCurrency: "",
+      altCurrency: "USD",
       date: "",
       rates: [],
       quote: "",
       baseAmount: "",
       altAmount:  "",
+      historicreadings: []
     };
 
     this.chartRef = React.createRef();
@@ -26,16 +29,71 @@ class Page extends React.Component {  constructor(props) {
   };
 
   componentDidMount(){
-    fetch("https://alt-exchange-rate.herokuapp.com/latest?base="+this.state.baseCurrency)
+    const {baseCurrency, altCurrency} = this.state;
+    this.getQuote(baseCurrency, altCurrency);
+    this.getRates(baseCurrency);
+    this.getHistoricalRates(baseCurrency, altCurrency);
+    };
+
+getQuote = (bccy, accy) => {
+  fetch("https://alt-exchange-rate.herokuapp.com/latest?base="+bccy+"&symbols="+accy)
     .then(response => response.json())
     .then(response => {
       this.setState({
-        baseCurrency: response.base,
-        date: response.date,
-        rates: response.rates,
+        quote: Object.values(response.rates)[0].toFixed(4),
       });
     });
   }
+
+getRates = (bccy) => {
+    fetch("https://alt-exchange-rate.herokuapp.com/latest?base="+bccy)
+      .then(response => response.json())
+      .then(response => {
+        this.setState({
+          rates: response.rates,
+          date: response.date,
+        });
+      });
+    }
+
+
+  getHistoricalRates = (bccy, accy) => {
+    const endDate = new Date().toISOString().split('T')[0];
+    const startDate = new Date((new Date).getTime() - (30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+
+    fetch("https://alt-exchange-rate.herokuapp.com/history?start_at="+startDate+"&end_at="+endDate+"&base="+bccy+"&symbols="+accy)
+      .then(response => response.json())
+      .then(response => {
+        const chartLabels = Object.keys(response.rates);
+        const chartData = Object.values(response.rates).map(rate => rate[accy]);
+        const chartLabel = bccy+"/"+accy;
+        this.buildChart(chartLabels, chartData, chartLabel);
+      })
+
+  }
+
+  buildChart = (labels, data, label) => {
+      const chartRef = this.chartRef.current.getContext("2d");
+      if (typeof this.chart !== "undefined") {
+        this.chart.destroy();
+      }
+
+      this.chart = new Chart(this.chartRef.current.getContext("2d"), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+              label: label,
+              data,
+              fill: false,
+              tension: 0,
+            }]
+        },
+        options: {
+          responsive: true,
+        }
+      })
+    }
 
   toAlt(amount, rate) {
     return amount*rate;
@@ -71,67 +129,21 @@ class Page extends React.Component {  constructor(props) {
 
   baseChange(event) {
     this.setState( {baseCurrency: event.target.value} )
-    fetch("https://alt-exchange-rate.herokuapp.com/latest?base="+event.target.value)
-    .then(response => response.json())
-    .then(response => {
-      this.setState({
-        baseCurrency: response.base,
-        date: response.date,
-        rates: response.rates,
-      });
-    });
+    const {altCurrency} = this.state;
+    this.getQuote(event.target.value, altCurrency);
+    this.getRates(event.target.value);
+    this.getHistoricalRates(event.target.value, altCurrency);
   };
 
   altChange(event) {
-    this.setState( {altCurrency: event.target.value} )
-    fetch("https://alt-exchange-rate.herokuapp.com/latest?base="+this.state.baseCurrency+"&symbols="+event.target.value)
-      .then(response => response.json())
-      .then(response => {
-        this.setState({
-          baseCurrency: response.base,
-          date: response.date,
-          quote: Object.values(response.rates)[0].toFixed(4),
-        });
-          this.setState({ altAmount: this.state.baseAmount*this.state.quote })
-      });
-    };
-
-  getHistoricalRates = (base, quote) => {
-    const endDate = new Date().toISOString().split('T')[0];
-    const startDate = new Date((new Date).getTime() - (30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
-
-    fetch(`https://alt-exchange-rate.herokuapp.com/history?start_at=${startDate}&end_at=${endDate}&base=${base}&symbols=${quote}`)
-    .then(data => {
-      const chartLabels = Object.keys(data.rates);
-      const chartData = Object.values(data.rates).map(rate => rate[quote]);
-      const chartLabel = `${base}/${quote}`;
-      this.buildChart(chartLabels, chartData, chartLabel);
-    })
-    .catch(error => console.error(error.message));
-  }
-buildChart = (labels, data, label) => {
-  const chartRef = this.chartRef.current.getContext("2d");
-  if (typeof this.chart !== "undefined") {
-    this.chart.destroy();
-  }
-  this.chart = new Chart(this.chartRef.current.getContext("2d"), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: label,
-          data,
-          fill: false,
-          tension: 0,
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-    }
-  })
-}
+    this.setState({
+      altCurrency: event.target.value,
+      altAmount: this.state.baseAmount*this.state.quote
+    });
+    const {baseCurrency} = this.state;
+    this.getQuote(baseCurrency, event.target.value);
+    this.getHistoricalRates(baseCurrency, event.target.value);
+  };
 
 
   render () {
@@ -187,11 +199,11 @@ buildChart = (labels, data, label) => {
                           </div>) : (<span id="remarks">*choose currency pair</span>)}
 
         </div>
-        <div className="historic_chart col-12">
-          <canvas ref={this.chartRef} />
-        </div>
       </div>
-      </div>
+    </div>
+    <div className="chart-container">
+      <canvas ref={this.chartRef} />
+    </div>
       <hr/>
       <div className="rate_table_panel">
         <h1 className="page_heading col-12">GLOBAL CURRENCY RATES</h1>

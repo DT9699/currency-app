@@ -36,13 +36,17 @@
   .date_quote {
     margin-left: 10px;
   }
+
+  .chart-container {
+    padding-top: 15px;
+  }
 }
 
 @media (min-width: 768px) {
   .convertor_panel {
     margin: 40px auto;
     height: 400px;
-    width: 816px;
+    width: 825px;
   }
 
   .page_heading {
@@ -72,6 +76,10 @@
 
   .date_quote {
     margin-left: 5px;
+  }
+
+  .chart-container {
+    width: 825px;
   }
 }
 
@@ -145,4 +153,9 @@ footer {
 }
 .socialmedia_icon {
   margin: 10px;
+}
+
+.chart-container {
+  position: relative;
+  margin: auto;
 }
