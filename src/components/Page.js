@@ -17,7 +17,6 @@ class Page extends React.Component {
       quote: "",
       baseAmount: "",
       altAmount:  "",
-      historicreadings: []
     };
 
     this.chartRef = React.createRef();
